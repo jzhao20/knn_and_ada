@@ -67,5 +67,5 @@ T=array2table(correct,'VariableNames',cols,'RowNames',rows);
 accuracy_string=sprintf("Accuracy is: %f%%",accuracy*100);
 f=figure;
 t=uitable('Data',T{:,:},'ColumnName',T.Properties.VariableNames,'RowName',T.Properties.RowNames);
-uicontrol('Style','text','Position',[20 320 200 20],'String',accuracy_string);
+uicontrol('Style','text','Position',[30 330 200 20],'String',accuracy_string);
 
