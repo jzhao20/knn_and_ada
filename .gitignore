@@ -1,0 +1,8 @@
+*.asv
+*.pdf
+*.txt
+*.png
+*.zip
+write_up/
+cifar*/
+
