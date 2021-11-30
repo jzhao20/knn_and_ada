@@ -1,45 +1,6 @@
-addpath("utils")
-if ~exist('cifar-10-batches-mat','dir')
-    cifar10Dataset = 'cifar-10-matlab';
-    websave([cifar10Dataset,'.tar.gz'],...
-        ['https://www.cs.toronto.edu/~kriz/',cifar10Dataset,'.tar.gz']);
-    gunzip([cifar10Dataset,'.tar.gz'])
-    delete([cifar10Dataset,'.tar.gz'])
-    untar([cifar10Dataset,'.tar'])
-    delete([cifar10Dataset,'.tar'])
-end    
-   
-if ~exist('cifar10Train','dir') 
-    saveCIFAR10AsFolderOfImages('cifar-10-batches-mat', pwd, true);
-end
-%code above from https://www.mathworks.com/matlabcentral/fileexchange/62990-deep-learning-tutorial-series
+addpath("utils_knn")
 
-imsetTrain=imageSet('cifar10Train','recursive');
-classes={imsetTrain.Description};
-labels=[];
-train=zeros([3072,sum([imsetTrain.Count])]);
-j=0;
-for c=1:length(imsetTrain)
-    for i=1:imsetTrain(c).Count
-        labels(end+1)=c;
-        train(:,i+j)=reshape(read(imsetTrain(c),i),[3072,1,1]);
-    end
-    j=j+imsetTrain(c).Count;
-end
-
-imsetTest=imageSet('cifar10Test','recursive');
-test_labels=[];
-count=[imsetTest.Count];
-total_count=sum(count);
-test=zeros([3072,total_count]);
-j=0;
-for c=1:length(imsetTest)
-    for i=1:imsetTest(c).Count
-        test_labels(end+1)=c;
-        test(:,i+j)=reshape(read(imsetTest(c),i),[3072,1,1]);
-    end
-    j=j+imsetTest(c).Count;
-end
+[test,train,labels,test_labels,classes]=read_input();
 
 proj=projection(train);
 projected_train=proj'*train;
@@ -69,3 +30,51 @@ f=figure;
 t=uitable('Data',T{:,:},'ColumnName',T.Properties.VariableNames,'RowName',T.Properties.RowNames);
 uicontrol('Style','text','Position',[30 330 200 20],'String',accuracy_string);
 
+f2=figure;
+confusionchart(correct(:,1:end-1),rows);
+
+
+
+function [test,train,labels,test_labels,classes] = read_input()
+    if ~exist('cifar-10-batches-mat','dir')
+        cifar10Dataset = 'cifar-10-matlab';
+        websave([cifar10Dataset,'.tar.gz'],...
+            ['https://www.cs.toronto.edu/~kriz/',cifar10Dataset,'.tar.gz']);
+        gunzip([cifar10Dataset,'.tar.gz'])
+        delete([cifar10Dataset,'.tar.gz'])
+        untar([cifar10Dataset,'.tar'])
+        delete([cifar10Dataset,'.tar'])
+    end
+    
+    if ~exist('cifar10Train','dir')
+        saveCIFAR10AsFolderOfImages('cifar-10-batches-mat', pwd, true);
+    end
+    %code above from https://www.mathworks.com/matlabcentral/fileexchange/62990-deep-learning-tutorial-series
+    
+    imsetTrain=imageSet('cifar10Train','recursive');
+    classes={imsetTrain.Description};
+    labels=[];
+    train=zeros([3072,sum([imsetTrain.Count])]);
+    j=0;
+    for c=1:length(imsetTrain)
+        for i=1:imsetTrain(c).Count
+            labels(end+1)=c;
+            train(:,i+j)=reshape(read(imsetTrain(c),i),[3072,1,1]);
+        end
+        j=j+imsetTrain(c).Count;
+    end
+    
+    imsetTest=imageSet('cifar10Test','recursive');
+    test_labels=[];
+    count=[imsetTest.Count];
+    total_count=sum(count);
+    test=zeros([3072,total_count]);
+    j=0;
+    for c=1:length(imsetTest)
+        for i=1:imsetTest(c).Count
+            test_labels(end+1)=c;
+            test(:,i+j)=reshape(read(imsetTest(c),i),[3072,1,1]);
+        end
+        j=j+imsetTest(c).Count;
+    end
+end
