@@ -1,7 +1,44 @@
 addpath('utils')
 [test,train,labels,test_labels,classes]=read_input();
 train_indexes=get_points(train,labels);
+epochs=10;
+num_features=500;
+feature_train=zeros([num_features,size(train,3)]);
+feature_indexes=zeros([1,num_features]);
+for i=1:size(train,3)
+    if i==1
+        [feature_train(:,i),features_indexes]=features(train(:,:,i),num_features);
+    else
+        feature_train(:,i)=features(train(:,:,i),num_features,features_indexes);
+    end
+end
 
+feature_test=zeros([num_features,size(test,3)]);
+for i=1:size(test,3)
+    feature_test(:,i)=features(feature_test,num_features,feature_indexes);
+end
+
+classifiers=zeros([5,epochs,length(classes)]);
+for i = 1:length(classes)
+    classifiers(:,:,i)=adaboost_binary(feature_train,labels,i,epochs);
+end
+
+correct=zeros(length(classes));
+num_correct=0;
+for i=1:size(feature_test,2)
+    tmp=zeros([1,10]);
+    for j=1:size(classifiers,3)
+        tmp(j)=classify_ada(classifiers(:,:,j),feature_test(:,i));
+    end
+    [~,class]=max(tmp);
+    num_correct=num_correct+(class == test_labels(i));
+    correct(test_labels(i),class)=correct(test_labels(i),class)+1;
+end
+
+format short g;
+accuracy=num_correct/(size(feature_test,2));
+fprintf("the accuracy was %f%%",accuracy*100);
+confusionchart(correct);
 
 
 function [test,train,labels,test_labels,classes] = read_input()
@@ -22,15 +59,24 @@ end
 
 imsetTrain=imageSet('cifar10Train','recursive');
 classes={imsetTrain.Description};
-labels=[];
-train=zeros([32,32,sum([imsetTrain.Count])]);
+num_per_class=200;
+train=zeros([32,32,num_per_class*length(classes)]);
+labels=zeros([1,num_per_class*length(classes)]);
 j=0;
 for c=1:length(imsetTrain)
+    %select 200 random ones per class to reduce time of training
+    tmp=zeros([32,32,imsetTrain(c).Count]);
+    tmp_labels=zeros([1,imsetTrain(c).Count]);
     for i=1:imsetTrain(c).Count
-        labels(end+1)=c;
-        train(:,:,i+j)=rrgb2gray(ead(imsetTrain(c),i));
+        tmp_labels(i)=c;
+        tmp(i)=rrgb2gray(read(imsetTrain(c),i));
     end
-    j=j+imsetTrain(c).Count;
+    indexes=randperm(1,num_per_class);
+    for i =1:num_per_class
+        labels(i+j)=tmp_labels(indexes(i));
+        train(i+j)=tmp(:,:,indexes(i));
+    end
+    j=j+num_per_class;
 end
 
 imsetTest=imageSet('cifar10Test','recursive');

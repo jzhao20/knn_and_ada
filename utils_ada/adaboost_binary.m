@@ -14,8 +14,8 @@ function [classifier] = adaboost_binary(train,labels,label, epochs)
         sorted_orders(i)=orderX;
     end
     H=zeros(1,size(train,2));
-    h=zeros(1,size(train,2));
-    classifier=zeros(4,epochs);
+    ht=zeros(1,size(train,2));
+    classifier=zeros(5,epochs);
     for iter =1:epochs
         t_opt=0;
         sign_opt=0;
@@ -38,13 +38,14 @@ function [classifier] = adaboost_binary(train,labels,label, epochs)
         alpha=log((1-error_opt)/error_opt)/2;
         [id1,id0]=find_elements(train,sorted_vecX,sorted_orders,t_opt);
         if sign_opt>0
-            h(id1)=1;
-            h(id0)=0;
+            ht(id1)=1;
+            ht(id0)=0;
         else
-            h(id1)=0;
-            h(id0)=1;
+            ht(id1)=0;
+            ht(id0)=1;
         end
         H=H+ht*alpha;
+        classifier(5,iter)=alpha;
         yt=2*labels-1;
         weights=weights.*exp(-alpha*(yt.*h));
         weights=weights/sum(weights);
