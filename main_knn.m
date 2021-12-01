@@ -1,12 +1,13 @@
 addpath("utils_knn")
 
-[test,train,labels,test_labels,classes]=read_input();
+[test,train,labels,test_labels,classes,count]=read_input();
 
 proj=projection(train);
 projected_train=proj'*train;
 correct=zeros([length(classes),length(classes)+1],'double');
-for i=1:sum([imsetTest.Count])
-    [pred,label]=nearest_neighbors(projected_train,test_labels,labels,i,test,proj);
+k=11;
+for i=1:length(test)
+    [pred,label]=nearest_neighbors(projected_train,test_labels,labels,i,test,proj,k);
     correct(label,pred)=correct(label,pred)+1;
 end
 
@@ -17,25 +18,16 @@ for i=1:length(classes)
 end
 
 format short g
+total_count=sum(count);
 accuracy=num_correct/total_count;
 
-rows=classes;
-classes{end+1}='total';
-cols=classes;
-
-T=array2table(correct,'VariableNames',cols,'RowNames',rows);
-
-accuracy_string=sprintf("Accuracy is: %f%%",accuracy*100);
+accuracy_string=fprintf("Accuracy is: %f%%\n",accuracy*100);
 f=figure;
-t=uitable('Data',T{:,:},'ColumnName',T.Properties.VariableNames,'RowName',T.Properties.RowNames);
-uicontrol('Style','text','Position',[30 330 200 20],'String',accuracy_string);
-
-f2=figure;
-confusionchart(correct(:,1:end-1),rows);
+confusionchart(correct(:,1:end-1),classes);
 
 
 
-function [test,train,labels,test_labels,classes] = read_input()
+function [test,train,labels,test_labels,classes,count] = read_input()
     if ~exist('cifar-10-batches-mat','dir')
         cifar10Dataset = 'cifar-10-matlab';
         websave([cifar10Dataset,'.tar.gz'],...

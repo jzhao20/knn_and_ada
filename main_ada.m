@@ -1,7 +1,7 @@
 addpath('utils_ada')
 [test,train,labels,test_labels,classes]=read_input();
-epochs=10;
-num_features=100;
+epochs=40;
+num_features=250;
 feature_train=zeros([num_features,size(train,3)]);
 feature_indexes=zeros([5,num_features]);
 
@@ -42,6 +42,7 @@ end
 format short g;
 accuracy=num_correct/(size(feature_test,2));
 fprintf("the accuracy was %f%%\n",accuracy*100);
+f=figure;
 confusionchart(correct,classes);
 
 
@@ -63,7 +64,7 @@ end
 
     imsetTrain=imageSet('cifar10Train','recursive');
     classes={imsetTrain.Description};
-    num_per_class=200;
+    num_per_class=500;
     train=zeros([32,32,num_per_class*length(classes)]);
     labels=zeros([1,num_per_class*length(classes)]);
     j=0;
