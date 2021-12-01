@@ -27,8 +27,8 @@ end
 
 function [output]=typeC(integral_matrix,x1,y1,x2,y2)
     big=compute_rectangle(integral_matrix,x1,y1,x2,y2);
-    y3=floor(y2/3)+x1;
-    y4=floor(2*y2/3)+x1;
+    y3=floor((y2-y1)/3)+y1;
+    y4=floor((y2-y1)*2/3)+y1;
     black_rectangle=compute_rectangle(integral_matrix,x1,y3,x2,y4);
     output=2*black_rectangle-big;
 end

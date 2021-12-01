@@ -6,11 +6,11 @@ function [output] = classify_ada(classifier,features)
         if(features(index)>t_opt)
             ht=1;
         else
-            ht=0;
+            ht=-1;
         end
         sign_opt=classifier(3,i);
-        if sign_opt<=0
-            ht=abs(1-ht);
+        if sign_opt<0
+            ht=-ht;
         end
         output=output+ht*classifier(5,i);
     end

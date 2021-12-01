@@ -10,8 +10,8 @@ function [index]= binary_search(sorted_vecX,t_opt)
     l=1;
     r=length(sorted_vecX);
     while l<=r
-        m=(l+r)/2;
-        if sorted_vecX(m)<=t_opt
+        m=floor((l+r)/2);
+        if sorted_vecX(m)>=t_opt
             r=m-1;
         else
             l=m+1;

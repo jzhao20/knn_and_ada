@@ -7,7 +7,7 @@ function [t,sign,error] = weak_classifier(sorted_vec,weights,labels)
     w0_c=0;
     w1_c=0;
     for i=1:length(sorted_vec)
-        if label(i)==0
+        if labels(i)==0
             w0_c=w0_c+weights(i);
         else
             w1_c=w1_c+weights(i);
@@ -16,16 +16,17 @@ function [t,sign,error] = weak_classifier(sorted_vec,weights,labels)
         error_negative=w1-w1_c+w0_c;
         if min(error_positive,error_negative)<error
             error=min(error_positive,error_negative);
-            if i==1 || i==length(vec)
+            if i==1 || i==length(sorted_vec)
                 t=sorted_vec(i);
             else
-                t=sorted_vec(i)+sorted_vec(i+1)/2;
+                t=(sorted_vec(i)+sorted_vec(i+1))/2;
             end
             if error_positive<error_negative
                 sign=1;
             else
                 sign=-1;
             end
+        end
     end
 end
 

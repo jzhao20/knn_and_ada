@@ -1,25 +1,26 @@
 function [random_features, random_feature_indexes] = features(gray_image,num_features,random_feature_indexes)
-        %create some of each type and then select a random subset of each one
-        %in this case 250 of each
+        %pick some random features and store those as the way to grab
+        %features
         integral_matrix=integral_image(gray_image);
-        [rows,cols]=size(integral_matrix);
-        features=[];
-        for x=1:rows
-            for y=1:cols
-                for x2=x+2:rows
-                    for y2=y+2:cols
-                        for i=1:4
-                            features(end+1)=compute_features(integral_matrix,x,y,x2,y2,i);
-                        end
-                    end
-                end
+        random_features=zeros([1,num_features]);
+        if nargin < 3
+            [rows,cols]=size(integral_matrix);
+            random_feature_indexes=zeros([5,num_features]);
+            for i =1:num_features
+                type=randi(4,1,1);
+                values=randi([1,rows-1],1,2);
+                [x1,y1]=deal(values(1),values(2));
+                x2=randi([x1,rows],1);
+                y2=randi([y1,cols],1);
+                random_feature_indexes(:,i)=[x1,y1,x2,y2,type]';
+                random_features(i)=compute_features(integral_matrix,x1,y1,x2,y2,type);
+            end
+        else
+            for i=1:num_features
+                j=random_feature_indexes(:,i);
+                [x1,y1,x2,y2,type]=deal(j(1),j(2),j(3),j(4),j(5));
+                random_features(i)=compute_features(integral_matrix,x1,y1,x2,y2,type);
             end
         end
-        %pick 2000 random features and store the indexes of these features so
-        %that it'll always remain the same 
-        if nargin <3
-            random_feature_indexes=randperm(size(features),num_features);
-        end
-        random_features=features(random_feature_indexes);
 end
 

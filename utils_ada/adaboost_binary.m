@@ -8,10 +8,12 @@ function [classifier] = adaboost_binary(train,labels,label, epochs)
     weights(ids1)=1/length(ids1)/2;
     w_original=weights;
     num_features=size(train,1);
+    sorted_vecX=zeros(num_features,size(train,2));
+    sorted_orders=zeros(num_features,size(train,2));
     for i=1:num_features
         [vecX,orderX]=sort(train(i,:));
-        sorted_vecX(i)=vecX;
-        sorted_orders(i)=orderX;
+        sorted_vecX(i,:)=vecX;
+        sorted_orders(i,:)=orderX;
     end
     H=zeros(1,size(train,2));
     ht=zeros(1,size(train,2));
@@ -21,9 +23,9 @@ function [classifier] = adaboost_binary(train,labels,label, epochs)
         sign_opt=0;
         error_opt=0.5;
         index=0;
-        for i =1:size(train,2)
-            [t,sign,error]=weak_classifier(sorted_vecX(i),weights(sorted_orders(i))...
-                ,labels(sorted_orders(i)));
+        for i =1:size(train,1)
+            [t,sign,error]=weak_classifier(sorted_vecX(i,:),weights(sorted_orders(i,:))...
+                ,labels(sorted_orders(i,:)));
              if error<error_opt
                 error_opt=error;
                 t_opt=t;
@@ -36,22 +38,23 @@ function [classifier] = adaboost_binary(train,labels,label, epochs)
         classifier(3,iter)=sign_opt;
         classifier(4,iter)=index;
         alpha=log((1-error_opt)/error_opt)/2;
-        [id1,id0]=find_elements(train,sorted_vecX,sorted_orders,t_opt);
+        [id1,id0]=find_elements(sorted_vecX(index,:),sorted_orders(index,:),t_opt);
         if sign_opt>0
             ht(id1)=1;
-            ht(id0)=0;
+            ht(id0)=-1;
         else
-            ht(id1)=0;
+            ht(id1)=-1;
             ht(id0)=1;
         end
         H=H+ht*alpha;
         classifier(5,iter)=alpha;
         yt=2*labels-1;
-        weights=weights.*exp(-alpha*(yt.*h));
+        weights=weights.*exp(-alpha*(yt.*ht));
         weights=weights/sum(weights);
 
-        ids0=find((H>0&labels==0)|(H<=0 & trainY==1));
+        ids0=find((H>0&labels==0)|(H<=0 & labels==1));
         fprintf('train_error = %f\n',sum(w_original(ids0)));
     end
+    fprintf('\n');
 end
 
